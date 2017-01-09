@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Department Notes</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script>
+  
+  function sendUsertyping(sectionID){
+  document.getElementById(sectionID).innerHTML="User is Typing...";
+  setTimeout(function(){ 
+        document.getElementById(sectionID).innerHTML=".";
+    }, 3000);
+  //ws.send("Message to send");
+  };
+  function sendData(){
+  ws.send("Message to send\n");
+  };
+  </script>
+</head>
+<body>
+	<script>
+		var ws = new WebSocket('ws://localhost:8080/');
+		ws.onopen = function() {
+			document.getElementById("wsStatus").innerHTML="Connected...";			
+		};
+		ws.onclose = function() {
+			document.getElementById("wsStatus").innerHTML="Disconnected...";			
+		};
+		ws.onmessage = function(event) {
+			document.getElementById('note1Data').textContent = event.data;
+		};
+	</script>
+<div class="container">
+<p id="wsStatus"></p>
+  <p id="note1Data">.</p>
+  <h2>Department 1</h2>
+  <p id="note1Status">.</p>
+  <form>
+    <div class="form-group">
+      <label for="comment">Notes:</label>
+      <textarea class="form-control" rows="5" id="comment1" onkeydown="sendUsertyping('note1Status')"></textarea>
+    </div>
+  </form>
+  <button type="button" class="btn btn-default" onclick="sendData">Send</button>
+  <h2>Department 2</h2>
+  <p id="note2Status">.</p>
+  <form>
+    <div class="form-group">
+      <label for="comment">Notes:</label>
+      <textarea class="form-control" rows="5" id="comment2" onkeydown="sendUsertyping('note2Status')"></textarea>
+    </div>
+  </form>  
+</div>
+</body>
+</html>
