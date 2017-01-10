@@ -7,53 +7,77 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script>
-  
-  function sendUsertyping(sectionID){
-  document.getElementById(sectionID).innerHTML="User is Typing...";
-  setTimeout(function(){ 
-        document.getElementById(sectionID).innerHTML=".";
-    }, 3000);
-  //ws.send("Message to send");
-  };
-  function sendData(){
-  ws.send("Message to send\n");
-  };
+  <script>  
+	var server_data = {"type":"test","data":"na"};
+	function sendUsertyping(sectionID){
+		server_data = {"type":"userInput","section":sectionID}
+		sendData(server_data);
+		//document.getElementById(sectionID).innerHTML="User is Typing...";
+		setTimeout(function(){ 
+			document.getElementById(sectionID).innerHTML=".";
+		}, 3000);
+	};
+	var ws = new WebSocket('ws://10.25.20.168:8080/');
+	ws.onopen = function() {
+		document.getElementById("wsStatus").innerHTML="Connected...";			
+	};
+	ws.onclose = function() {
+		document.getElementById("wsStatus").innerHTML="Disconnected...";			
+	};
+	ws.onmessage = function(event) {	
+		incoming = event.data;
+		console.log("Incoming message from websocket: "+incoming);
+		incoming = incoming.split("'").join('"');
+		incoming = incoming.split(" ").join("");
+		incoming_data = incoming.split('u"').join('"');		
+		incoming_data = JSON.parse(incoming_data);		
+		if (incoming_data["type"]=="time"){ 
+			document.getElementById('time').textContent = incoming_data["time"];
+			};
+		if (incoming_data["type"]=="userInput"){ 
+			document.getElementById(incoming_data["section"]).textContent = "Typing...";
+			};			
+	};
+	
+	function sendNotes(commentID){
+		notes = {"type":"notes", "noteSection":commentID, "notes":document.getElementById(commentID).text}
+		console.log(notes);
+		//sendData();
+	};
+	function sendData(server_data){
+		console.log("Sending message to websocket ");
+		ws.send(JSON.stringify(server_data));
+	};
+	function disconnectws(){ 
+		console.log("Closing websocket");
+		ws.close(); 
+	};
   </script>
 </head>
 <body>
-	<script>
-		var ws = new WebSocket('ws://localhost:8080/');
-		ws.onopen = function() {
-			document.getElementById("wsStatus").innerHTML="Connected...";			
-		};
-		ws.onclose = function() {
-			document.getElementById("wsStatus").innerHTML="Disconnected...";			
-		};
-		ws.onmessage = function(event) {
-			document.getElementById('note1Data').textContent = event.data;
-		};
-	</script>
-<div class="container">
-<p id="wsStatus"></p>
-  <p id="note1Data">.</p>
-  <h2>Department 1</h2>
-  <p id="note1Status">.</p>
-  <form>
-    <div class="form-group">
-      <label for="comment">Notes:</label>
-      <textarea class="form-control" rows="5" id="comment1" onkeydown="sendUsertyping('note1Status')"></textarea>
-    </div>
-  </form>
-  <button type="button" class="btn btn-default" onclick="sendData">Send</button>
-  <h2>Department 2</h2>
-  <p id="note2Status">.</p>
-  <form>
-    <div class="form-group">
-      <label for="comment">Notes:</label>
-      <textarea class="form-control" rows="5" id="comment2" onkeydown="sendUsertyping('note2Status')"></textarea>
-    </div>
-  </form>  
-</div>
+	<div class="container">
+		<p id="wsStatus"></p>
+		<p id="time">.</p>
+		<p id="noteData">.</p>
+		<h2>Department 1</h2>
+		<p id="note1Status">.</p>
+		<form>
+		<div class="form-group">
+		  <label for="comment">Notes:</label>
+		  <textarea class="form-control" rows="5" id="comment1" onkeydown="sendUsertyping('note1Status')"></textarea>
+		  <button type="button" class="btn btn-default" onclick="sendNotes('comment1')">Send</button>
+		</div>
+		</form>
+		<h2>Department 2</h2>
+		<p id="note2Status">.</p>
+		<form>
+		<div class="form-group">
+		  <label for="comment">Notes:</label>
+		  <textarea class="form-control" rows="5" id="comment2" onkeydown="sendUsertyping('note2Status')"></textarea>
+		  <button type="button" class="btn btn-default" onclick="sendNotes('comment2')">Send</button>
+		</div>
+		</form>  
+		<button type="button" class="btn btn-default" onclick="disconnectws()">Disconnect</button>
+	</div>
 </body>
 </html>
