@@ -7,10 +7,12 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script>  
-	var server_data = {"type":"test","data":"na"};
+  <script> 
+	var twaAgendaID = "2017-01-08T2017-01-14";
+	var userName = "SandeepB"
+	var server_test_data = {"type":"test","data":"na"};
 	function sendUsertyping(sectionID){
-		server_data = {"type":"userInput","section":sectionID}
+		server_data = {"type":"userInput","section":sectionID,"userName":userName,"twaAgendaID":twaAgendaID}
 		sendData(server_data);
 		//document.getElementById(sectionID).innerHTML="User is Typing...";
 		setTimeout(function(){ 
@@ -28,25 +30,46 @@
 		incoming = event.data;
 		console.log("Incoming message from websocket: "+incoming);
 		incoming = incoming.split("'").join('"');
-		incoming = incoming.split(" ").join("");
+		//incoming = incoming.split(" ").join("");
 		incoming_data = incoming.split('u"').join('"');		
 		incoming_data = JSON.parse(incoming_data);		
 		if (incoming_data["type"]=="time"){ 
 			document.getElementById('time').textContent = incoming_data["time"];
-			};
+		};
 		if (incoming_data["type"]=="userInput"){ 
-			document.getElementById(incoming_data["section"]).textContent = "Typing...";
-			};			
+			document.getElementById(incoming_data["section"]).innerHTML = incoming_data["userName"]+" is Typing...";
+			removalID = incoming_data["section"];
+			setTimeout(function(){				
+				document.getElementById(removalID).innerHTML = ".";
+			}, 3000);
+		};		
+		if (incoming_data["type"]=="notes"){
+			if (incoming_data["twaAgendaID"] == twaAgendaID){
+				if (document.getElementById(incoming_data["noteSection"]).disabled == true) {
+					document.getElementById(incoming_data["noteSection"]).value = incoming_data["notes"];
+				}
+			}
+		};
 	};
 	
-	function sendNotes(commentID){
-		notes = {"type":"notes", "noteSection":commentID, "notes":document.getElementById(commentID).text}
-		console.log(notes);
-		//sendData();
+	function sendNotes(commentID,editID,sendID){
+		document.getElementById(commentID).disabled = true;
+		document.getElementById(editID).disabled = false;
+		document.getElementById(sendID).disabled = true;
+		notes = {"type":"notes", "noteSection":commentID, "notes":document.getElementById(commentID).value, "userName":userName, "twaAgendaID":twaAgendaID}
+		sendData(notes);
+		sendData(notes);
+		
+	};
+	function editNotes(commentID,editID,sendID){
+		document.getElementById(commentID).disabled = false;
+		document.getElementById(editID).disabled = true;
+		document.getElementById(sendID).disabled = false;
 	};
 	function sendData(server_data){
 		console.log("Sending message to websocket ");
 		ws.send(JSON.stringify(server_data));
+		//ws.send(server_test_data);
 	};
 	function disconnectws(){ 
 		console.log("Closing websocket");
@@ -64,8 +87,9 @@
 		<form>
 		<div class="form-group">
 		  <label for="comment">Notes:</label>
-		  <textarea class="form-control" rows="5" id="comment1" onkeydown="sendUsertyping('note1Status')"></textarea>
-		  <button type="button" class="btn btn-default" onclick="sendNotes('comment1')">Send</button>
+		  <textarea class="form-control" rows="5" id="comment1" onkeydown="sendUsertyping('note1Status')" disabled></textarea>
+		  <button type="button" class="btn btn-default" onclick="editNotes('comment1','edit1','send1')" id="edit1">Edit</button>
+		  <button type="button" class="btn btn-default" onclick="sendNotes('comment1','edit1','send1')" id="send1" disabled>Send</button>
 		</div>
 		</form>
 		<h2>Department 2</h2>
@@ -73,8 +97,9 @@
 		<form>
 		<div class="form-group">
 		  <label for="comment">Notes:</label>
-		  <textarea class="form-control" rows="5" id="comment2" onkeydown="sendUsertyping('note2Status')"></textarea>
-		  <button type="button" class="btn btn-default" onclick="sendNotes('comment2')">Send</button>
+		  <textarea class="form-control" rows="5" id="comment2" onkeydown="sendUsertyping('note2Status')" disabled></textarea>
+		  <button type="button" class="btn btn-default" onclick="editNotes('comment2','edit2','send2')" id="edit2">Edit</button>
+		  <button type="button" class="btn btn-default" onclick="sendNotes('comment2','edit2','send2')" id="send2" disabled>Send</button>
 		</div>
 		</form>  
 		<button type="button" class="btn btn-default" onclick="disconnectws()">Disconnect</button>
