@@ -20,14 +20,16 @@
 	};
 	var ws = new WebSocket('ws://10.25.20.168:8080/');
 	ws.onopen = function() {
-		document.getElementById("wsStatus").innerHTML="Connected...";			
+		document.getElementById("wsStatus").className = "alert alert-success";
+		document.getElementById("wsStatus").innerHTML = '<strong>Connected! to the websocket server... <span class="glyphicon glyphicon-ok"></span>';
 	};
 	ws.onclose = function() {
-		document.getElementById("wsStatus").innerHTML="Disconnected...";			
+		document.getElementById("wsStatus").className = "alert alert-danger";
+		document.getElementById("wsStatus").innerHTML = '<strong>Disconnected!</strong> from the websocket server... Refresh <span class="glyphicon glyphicon-refresh"></span> Page to try reconnection...';	
 	};
 	ws.onmessage = function(event) {		
 		incoming_data = event.data;
-		console.log("Incoming message from websocket: "+incoming_data);
+		//console.log("Incoming message from websocket: "+incoming_data);
 		//incoming_data = incoming_data.split("'").join('"');	
 		incoming_data = JSON.parse(incoming_data);		
 		if (incoming_data["type"]=="time"){ 
@@ -62,22 +64,25 @@
 		document.getElementById(sendID).disabled = false;
 	};
 	function sendData(server_data){
-		console.log("Sending message to websocket ");
+		//console.log("Sending message to websocket ");
 		ws.send(JSON.stringify(server_data));
 	};
 	function disconnectws(){ 
-		console.log("Closing websocket");
+		//console.log("Closing websocket");
 		ws.close(); 
 	};
 	function connectws(){ 
-		console.log("Starting websocket");
+		//console.log("Starting websocket");
 		ws = new WebSocket('ws://10.25.20.168:8080/');
 	};
   </script>
 </head>
 <body>
+<div class="container-fluid">
+	<div class="alert alert-info" id="wsStatus">Server status...</div>
+</div>
 	<div class="container">
-		<p id="wsStatus"></p>
+		<p ></p>
 		<p id="time">.</p>
 		<p id="noteData">.</p>
 		<h2>Department 1</h2>
@@ -101,7 +106,6 @@
 		</div>
 		</form>  
 		<button type="button" class="btn btn-default" onclick="disconnectws()">Disconnect</button>
-		<button type="button" class="btn btn-default" onclick="connectws()">Connect</button>
 	</div>
 </body>
 </html>
