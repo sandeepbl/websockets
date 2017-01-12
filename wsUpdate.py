@@ -10,11 +10,11 @@ def send_inputs():
 	while True:		
 		inputList = c1.execute('select * from userInput')
 		for input in inputList:
-			print {"section":input[0],"userName":input[1],"twaAgendaID":input[1],"type":"userInput"}
+			print json.dumps({"section":str(input[0]),"userName":str(input[1]),"twaAgendaID":str(input[1]),"type":"userInput"}, encoding="ascii")
 			sys.stdout.flush()
 		notesList = c1.execute('select * from twaNotes')
 		for notes in notesList:
-			print {"noteSection" : notes[0], "notes" : notes[1], "userName" : notes[2], "twaAgendaID" : notes[3],"type":"notes"}
+			print json.dumps({"noteSection" : str(notes[0]), "notes" : str(notes[1]), "userName" : str(notes[2]), "twaAgendaID" :str(notes[3]),"type":"notes"}, encoding="ascii")
 			sys.stdout.flush()		
 		if counter == 3:
 			c1.execute('delete from userInput')
@@ -43,20 +43,23 @@ sendInputs = threading.Thread(target=send_inputs)
 sendInputs.start()
 
 while True:
-	try:
-		
+	try:		
 		inputstream = sys.stdin.readline()
 		sys.stdin.flush()
 		if str(inputstream) != '':
-			inputstream_json =  json.loads(sys.stdin.readline())
+			
+			inputstream_str =  json.dumps(inputstream, encoding="ascii")
+			print inputstream_str
+			inputstream_json =  json.loads(inputstream, encoding="ascii")
+			
 			if inputstream_json['type'] == 'userInput':
 				conn = sqlite3.connect('twaData.db')
 				c = conn.cursor()
 				c.execute('INSERT OR REPLACE INTO userInput(section, userName, twaAgendaID) VALUES("'+inputstream_json['section']+'","'+inputstream_json['userName']+'","'+inputstream_json['twaAgendaID']+'")')
 				conn.commit()
 				conn.close()
-			print str(inputstream_json)
-			sys.stdout.flush()
+			# print str(inputstream_json)
+			# sys.stdout.flush()
 			if inputstream_json['type'] == 'notes':
 				conn = sqlite3.connect('twaData.db')
 				c = conn.cursor()

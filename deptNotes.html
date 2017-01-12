@@ -14,7 +14,6 @@
 	function sendUsertyping(sectionID){
 		server_data = {"type":"userInput","section":sectionID,"userName":userName,"twaAgendaID":twaAgendaID}
 		sendData(server_data);
-		//document.getElementById(sectionID).innerHTML="User is Typing...";
 		setTimeout(function(){ 
 			document.getElementById(sectionID).innerHTML=".";
 		}, 3000);
@@ -26,12 +25,10 @@
 	ws.onclose = function() {
 		document.getElementById("wsStatus").innerHTML="Disconnected...";			
 	};
-	ws.onmessage = function(event) {	
-		incoming = event.data;
-		console.log("Incoming message from websocket: "+incoming);
-		incoming = incoming.split("'").join('"');
-		//incoming = incoming.split(" ").join("");
-		incoming_data = incoming.split('u"').join('"');		
+	ws.onmessage = function(event) {		
+		incoming_data = event.data;
+		console.log("Incoming message from websocket: "+incoming_data);
+		//incoming_data = incoming_data.split("'").join('"');	
 		incoming_data = JSON.parse(incoming_data);		
 		if (incoming_data["type"]=="time"){ 
 			document.getElementById('time').textContent = incoming_data["time"];
@@ -50,8 +47,7 @@
 				}
 			}
 		};
-	};
-	
+	};	
 	function sendNotes(commentID,editID,sendID){
 		document.getElementById(commentID).disabled = true;
 		document.getElementById(editID).disabled = false;
@@ -59,7 +55,6 @@
 		notes = {"type":"notes", "noteSection":commentID, "notes":document.getElementById(commentID).value, "userName":userName, "twaAgendaID":twaAgendaID}
 		sendData(notes);
 		sendData(notes);
-		
 	};
 	function editNotes(commentID,editID,sendID){
 		document.getElementById(commentID).disabled = false;
@@ -69,11 +64,14 @@
 	function sendData(server_data){
 		console.log("Sending message to websocket ");
 		ws.send(JSON.stringify(server_data));
-		//ws.send(server_test_data);
 	};
 	function disconnectws(){ 
 		console.log("Closing websocket");
 		ws.close(); 
+	};
+	function connectws(){ 
+		console.log("Starting websocket");
+		ws = new WebSocket('ws://10.25.20.168:8080/');
 	};
   </script>
 </head>
@@ -103,6 +101,7 @@
 		</div>
 		</form>  
 		<button type="button" class="btn btn-default" onclick="disconnectws()">Disconnect</button>
+		<button type="button" class="btn btn-default" onclick="connectws()">Connect</button>
 	</div>
 </body>
 </html>
