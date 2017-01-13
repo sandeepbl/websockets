@@ -7,6 +7,10 @@
 * Make sure that you have installed Python2 with sqlite3 module
 * Clone the repo to your system and enter into the directory
 * Make note of your systems IP address
+* Change the IP address in deptNotes.html file on line 21 as shown:
+```javascript
+  var ws = new WebSocket('ws://10.25.20.168:8080/');
+```
 * Run python webserver with the following command:
 ~~~
 >> python -m SimpleHTTPServer 8181
