@@ -21,6 +21,6 @@
 ~~~
 * In the web browser/s enter the path for the hosted page as shown:
 ~~~
-http://<your-IP-address>/deptNotes.html
+http://<your-IP-address>:8181/deptNotes.html
 ~~~
 Let me know whar you think.
